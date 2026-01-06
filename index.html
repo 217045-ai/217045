@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>唐朝歷史互動測驗</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 使用 Inter 字體作為默認，並提供中文字體回退 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', 'Microsoft YaHei', sans-serif;
+            background-color: #f7fafc;
+        }
+        /* 自定義滾動條樣式 */
+        .scrollable-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background-color: #a0aec0;
+            border-radius: 4px;
+        }
+        .scrollable-content::-webkit-scrollbar-track {
+            background-color: #edf2f7;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+
+    <div class="max-w-6xl mx-auto shadow-2xl rounded-xl bg-white overflow-hidden">
+        <header class="bg-indigo-700 text-white p-6 md:p-8 text-center rounded-t-xl">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">唐朝歷史與文化探索</h1>
+            <p class="text-indigo-200 mt-1">中國封建社會的黃金時代</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+            <!-- 左側：歷史資料區 -->
+            <div class="p-6 md:p-8 border-b lg:border-r lg:border-b-0 scrollable-content max-h-[80vh] overflow-y-auto">
+                <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b pb-2">一、 唐朝歷史資料</h2>
+                <div id="history-content" class="text-gray-700 space-y-4">
+                    <!-- 歷史資料內容會在此處插入 -->
+                </div>
+            </div>
+
+            <!-- 右側：互動測驗區 -->
+            <div class="p-6 md:p-8 scrollable-content max-h-[80vh] overflow-y-auto">
+                <h2 class="text-2xl font-bold text-indigo-800 mb-4 border-b pb-2">二、 歷史測驗 (共十題)</h2>
+                <div id="quiz-form" class="space-y-6">
+                    <!-- 測驗問題會在此處生成 -->
+                </div>
+                
+                <button id="submit-button" onclick="checkAnswers()"
+                    class="mt-8 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.01] shadow-lg">
+                    提交答案並查看結果
+                </button>
+
+                <!-- 結果顯示區 -->
+                <div id="results" class="mt-8 p-4 bg-yellow-100 border border-yellow-300 rounded-lg hidden">
+                    <h3 class="text-xl font-bold text-yellow-800 mb-2">測驗結果：</h3>
+                    <p id="score-display" class="text-lg font-semibold text-gray-800"></p>
+                    <div id="feedback" class="mt-4 space-y-3">
+                        <!-- 答題反饋和正確答案會在此處顯示 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 歷史資料 (來自原 Markdown)
+        const HISTORY_TEXT = `
+            <p><strong>唐朝概述 (618年 - 907年)</strong></p>
+            <p>唐朝是中國歷史上一個重要的朝代，由唐高祖李淵於公元618年建立，定都長安（今西安），歷經289年，傳21位皇帝。它以空前的繁榮、強大的國力和輝煌的文化成就而著稱，是中國封建社會的黃金時期。</p>
+            
+            <h3 class="text-xl font-semibold mt-4 text-indigo-600">1. 初唐盛世：貞觀之治 (626年 - 649年)</h3>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>核心人物：</strong> 唐太宗李世民。</li>
+                <li><strong>主要成就：</strong> 政治清明（輕徭薄賦，任用賢才，如魏徵）、經濟恢復、軍事擴張（擊敗東突厥，被尊為「天可汗」）。</li>
+            </ul>
+
+            <h3 class="text-xl font-semibold mt-4 text-indigo-600">2. 武周插曲 (690年 - 705年)</h3>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>唯一女皇：</strong> 武則天。改國號為周。</li>
+                <li><strong>功過爭議：</strong> 打擊門閥士族，提拔庶族人才，為開元盛世奠基。</li>
+            </ul>
+
+            <h3 class="text-xl font-semibold mt-4 text-indigo-600">3. 極盛時期：開元盛世 (713年 - 741年)</h3>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>核心人物：</strong> 唐玄宗李隆基。</li>
+                <li><strong>主要成就：</strong> 改革兵制（由府兵制改為募兵制）、社會富裕、長安成為國際大都會、詩歌文化巔峰（李白、杜甫）。</li>
+            </ul>
+
+            <h3 class="text-xl font-semibold mt-4 text-indigo-600">4. 轉折與衰退：安史之亂 (755年 - 763年)</h3>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>事件：</strong> 藩鎮節度使安祿山和史思明起兵叛亂。</li>
+                <li><strong>影響：</strong> 唐朝由盛轉衰的轉捩點；形成<strong>藩鎮割據</strong>局面。</li>
+            </ul>
+
+            <h3 class="text-xl font-semibold mt-4 text-indigo-600">5. 中晚唐的掙扎與滅亡</h3>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>政治問題：</strong> 宦官專權、黨爭、藩鎮割據。</li>
+                <li><strong>最終滅亡：</strong> 軍閥朱溫（朱全忠）廢唐哀帝，建立後梁。</li>
+            </ul>
+
+            <h3 class="text-xl font-semibold mt-4 text-indigo-600">二、 唐朝文化與制度</h3>
+            <ul class="list-disc list-inside ml-4 space-y-1">
+                <li><strong>詩歌：</strong> 「詩仙」李白、「詩聖」杜甫。</li>
+                <li><strong>制度：</strong> 完善<strong>三省六部制</strong>，科舉制度成為選拔官員主要途徑。</li>
+            </ul>
+        `;
+
+        // 測驗問題及答案 (使用數組存儲)
+        const quizData = [
+            { 
+                q: "1. 唐朝的建立者是誰？定都在哪裡？(請用「建立者；定都」格式回答)", 
+                a: "李淵；長安",
+                key: "唐高祖李淵；長安（今西安）"
+            },
+            { 
+                q: "2. 「貞觀之治」是哪位皇帝開創的盛世？當時他採取的政治策略中最著名的一項是什麼？(請用「皇帝；策略」格式回答)", 
+                a: "李世民；虛心納諫",
+                key: "唐太宗李世民；虛心納諫（或廣開言路）"
+            },
+            { 
+                q: "3. 中國歷史上唯一一位正統女皇帝是誰？她將國號改為哪個字？(請用「女皇；國號」格式回答)", 
+                a: "武則天；周",
+                key: "武則天；周"
+            },
+            { 
+                q: "4. 唐朝達到極盛的時期是哪位皇帝在位時？這個時期被稱為「____盛世」？(請用「皇帝；盛世名稱」格式回答)", 
+                a: "唐玄宗；開元",
+                key: "唐玄宗李隆基；開元盛世"
+            },
+            { 
+                q: "5. 唐玄宗在位期間，將主要的兵制由府兵制改為哪一種兵制？", 
+                a: "募兵制",
+                key: "募兵制"
+            },
+            { 
+                q: "6. 唐朝由盛轉衰的關鍵轉捩點事件是什麼？這場叛亂是由哪兩位節度使發起的？(請用「事件；發起者」格式回答)", 
+                a: "安史之亂；安祿山和史思明",
+                key: "安史之亂；安祿山和史思明"
+            },
+            { 
+                q: "7. 安史之亂後，地方軍閥擁兵自重，形成的局面被稱為什麼？", 
+                a: "藩鎮割據",
+                key: "藩鎮割據"
+            },
+            { 
+                q: "8. 唐朝時期，被譽為「詩仙」和「詩聖」的兩位詩人分別是誰？(請用「詩仙；詩聖」格式回答)", 
+                a: "李白；杜甫",
+                key: "詩仙李白；詩聖杜甫"
+            },
+            { 
+                q: "9. 在唐朝後期，哪一類人掌握了部分朝政大權，導致政治混亂？", 
+                a: "宦官",
+                key: "宦官（或宦官專權）"
+            },
+            { 
+                q: "10. 最終滅亡唐朝、建立後梁的軍閥是誰？", 
+                a: "朱溫",
+                key: "朱溫（朱全忠）"
+            }
+        ];
+
+        // 初始化函數
+        window.onload = function() {
+            document.getElementById('history-content').innerHTML = HISTORY_TEXT;
+            renderQuiz();
+        };
+
+        // 渲染測驗題目
+        function renderQuiz() {
+            const quizForm = document.getElementById('quiz-form');
+            quizData.forEach((item, index) => {
+                const qNum = index + 1;
+                const questionHtml = `
+                    <div id="q-${qNum}-container" class="p-4 bg-gray-50 rounded-lg shadow-sm">
+                        <label for="q-${qNum}" class="block text-base font-medium text-gray-900 mb-2">${item.q}</label>
+                        <input type="text" id="q-${qNum}" name="q-${qNum}" 
+                               class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" 
+                               placeholder="請輸入您的答案">
+                    </div>
+                `;
+                quizForm.innerHTML += questionHtml;
+            });
+        }
+
+        // 檢查答案並計算分數
+        function checkAnswers() {
+            let score = 0;
+            const feedbackContainer = document.getElementById('feedback');
+            feedbackContainer.innerHTML = '';
+            
+            // 讓結果區可見
+            document.getElementById('results').classList.remove('hidden');
+
+            quizData.forEach((item, index) => {
+                const qNum = index + 1;
+                const inputElement = document.getElementById(`q-${qNum}`);
+                const container = document.getElementById(`q-${qNum}-container`);
+                
+                // 獲取並清理用戶輸入 (轉為小寫並去除空格，方便比對)
+                const userAnswer = inputElement.value.toLowerCase().trim().replace(/[\s，,；;]/g, '');
+                
+                // 獲取標準答案 (轉為小寫並去除空格，方便比對)
+                // 由於有些題目允許多個答案，這裡需要特殊處理（例如：Q2的虛心納諫/廣開言路）
+                const acceptedAnswers = item.a.split(';').map(s => s.toLowerCase().trim().replace(/[\s，,；;]/g, ''));
+                
+                let isCorrect = false;
+                
+                // 檢查用戶答案是否在可接受的答案列表中
+                if (acceptedAnswers.some(correctAns => userAnswer === correctAns)) {
+                    isCorrect = true;
+                }
+
+                // 處理多個選項的答案，例如 Q1: 李淵；長安, Q2: 李世民；虛心納諫
+                // 這裡只檢查整個字符串是否完全匹配，因為格式要求嚴格（「；」分隔）
+                
+                let feedbackClass, statusText, statusIcon;
+
+                if (isCorrect) {
+                    score++;
+                    feedbackClass = 'bg-green-100 text-green-800 border-green-300';
+                    statusText = '正確';
+                    statusIcon = '✅';
+                    container.classList.remove('border-red-500');
+                    container.classList.add('border-green-500', 'border-2');
+                } else {
+                    feedbackClass = 'bg-red-100 text-red-800 border-red-300';
+                    statusText = '錯誤';
+                    statusIcon = '❌';
+                    container.classList.remove('border-green-500');
+                    container.classList.add('border-red-500', 'border-2');
+                }
+                
+                // 顯示詳細的反饋
+                const feedbackItem = `
+                    <div class="p-3 rounded-md ${feedbackClass}">
+                        <p class="font-semibold">${statusIcon} 第 ${qNum} 題: ${statusText}</p>
+                        <p class="text-sm">您的回答: ${inputElement.value || '未作答'}</p>
+                        <p class="text-sm">標準答案: ${item.key}</p>
+                    </div>
+                `;
+                feedbackContainer.innerHTML += feedbackItem;
+            });
+
+            // 顯示最終分數
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.innerHTML = `您的得分為：<span class="text-indigo-600 font-extrabold text-2xl">${score}</span> / 10 題！`;
+            
+            // 滾動到結果區
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
